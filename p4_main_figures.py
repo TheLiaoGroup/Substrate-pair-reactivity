@@ -398,7 +398,7 @@ def figure1():
          (0, 1.05))
 
     ax = fig.add_subplot(grid[1, 3])
-    style.panel_title(ax, "F  Table properties\ntrack the loss")
+    style.panel_title(ax, "F  Table ranks track loss")
     ax.scatter(combined, high.rf_delta_r2, s=16, color=MID, lw=0, zorder=3)
     ax.text(0.05, 0.95, f"ρ = {rho_table:.2f}", transform=ax.transAxes, ha="left", va="top", color=INK,
             weight="bold")
