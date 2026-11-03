@@ -181,6 +181,11 @@
       "sha256": "11b776122728287c923c3e53c73bfdc56a5f1672613a186a588ebe27b4a5d7cd"
     },
     {
+      "path": "figure_data/tableS2_population_flow.csv",
+      "bytes": 605,
+      "sha256": "6544006457d7eccd55740173785958c1824f8eeeb1504153ce007afef9925852"
+    },
+    {
       "path": "figure_data/tableS2_source_and_analysis_populations.csv",
       "bytes": 1345,
       "sha256": "bea247f9f7f870c98e0085d1007f840ba941b92719b3144d49491cb2ae44c637"
@@ -327,13 +332,13 @@
     },
     {
       "path": "PANEL_SOURCE_MAP.csv",
-      "bytes": 9863,
-      "sha256": "1e445cadfcbbf28e969aa4b02c04faacbafb2752d0e5cf9b786fd38b0eefdbbd"
+      "bytes": 9853,
+      "sha256": "76c4b8a81c8501a1db6d7f9e3ae13dd2cf38ec60b39f9ea84a1f01b909135703"
     },
     {
       "path": "README.md",
-      "bytes": 5115,
-      "sha256": "31a40b0d5b28d8979982d033e32d6d01e3df3d28804b0a365b49f319e8e4b296"
+      "bytes": 5158,
+      "sha256": "9f79b82210dbfce7cc6bf520507d194e32fcecd17c73df439871c4432073840e"
     }
   ]
 }

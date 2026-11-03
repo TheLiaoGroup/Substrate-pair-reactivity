@@ -1,0 +1,8 @@
+population,records,definition
+All source tables,410983,Organized records before the exclusions below.
+Single-substrate Finkelstein,3678,Excluded because two substrate roles are required.
+Excluded acylation wells,396,Five plates and five further wells on three other plates.
+Retained two-substrate records,406909,Full population used to construct pair/plate groups.
+Analysed numerical yields,378070,"357,356 quantified plus 20,714 zero-by-rule records."
+"Detected, not quantified",24226,"Product detected, numerical yield missing."
+No screening record,4613,"Missing screening record, never assigned zero."

@@ -15,8 +15,8 @@
     "array_metadata": "data/p4_screens.json",
     "transformations": 17
   },
-  "file_count": 179,
-  "total_bytes": 35617548,
+  "file_count": 180,
+  "total_bytes": 35618364,
   "files": [
     {
       "path": ".gitattributes",
@@ -575,18 +575,18 @@
     },
     {
       "path": "source_data/FILE_MANIFEST.json",
-      "bytes": 12529,
-      "sha256": "f7863dc8ea743b7ccdaf3d3ba67a8411c6c942b8e505243b9bc860e5bec00ce4"
+      "bytes": 12707,
+      "sha256": "98159f67db8483c20db0b9a5c0282b25e3212dc408e5f440ed2677cf286d0eda"
     },
     {
       "path": "source_data/PANEL_SOURCE_MAP.csv",
-      "bytes": 9863,
-      "sha256": "1e445cadfcbbf28e969aa4b02c04faacbafb2752d0e5cf9b786fd38b0eefdbbd"
+      "bytes": 9853,
+      "sha256": "76c4b8a81c8501a1db6d7f9e3ae13dd2cf38ec60b39f9ea84a1f01b909135703"
     },
     {
       "path": "source_data/README.md",
-      "bytes": 5115,
-      "sha256": "31a40b0d5b28d8979982d033e32d6d01e3df3d28804b0a365b49f319e8e4b296"
+      "bytes": 5158,
+      "sha256": "9f79b82210dbfce7cc6bf520507d194e32fcecd17c73df439871c4432073840e"
     },
     {
       "path": "source_data/chemistry/grignard_pair_condition_cells.csv",
@@ -769,6 +769,11 @@
       "sha256": "11b776122728287c923c3e53c73bfdc56a5f1672613a186a588ebe27b4a5d7cd"
     },
     {
+      "path": "source_data/figure_data/tableS2_population_flow.csv",
+      "bytes": 605,
+      "sha256": "6544006457d7eccd55740173785958c1824f8eeeb1504153ce007afef9925852"
+    },
+    {
       "path": "source_data/figure_data/tableS2_source_and_analysis_populations.csv",
       "bytes": 1345,
       "sha256": "bea247f9f7f870c98e0085d1007f840ba941b92719b3144d49491cb2ae44c637"
@@ -916,9 +921,9 @@
   ],
   "public_package_revision": {
     "identity": "public_package_20261102",
-    "scope": "Current manuscript title and repository address; panel-level Source Data with mapping and units; transformation terminology; revised labels in Figures 1 and 5; and a 115 x 25 mm graphical abstract. Original records, saved model results and chemical assets are unchanged.",
+    "scope": "Current manuscript title and repository address; panel-level Source Data with mapping, units, pairing-sparsity definition and the seven-row analysis population flow; transformation terminology; revised labels in Figures 1 and 5; and a 115 x 25 mm graphical abstract. Original records, saved model results and chemical assets are unchanged.",
     "prior_manifest_sha256": "168c5d2d3965f585af4a79c3c8d4b70906d0c550bb05ffe51f048061b840d149",
-    "added_source_data_files": 68,
+    "added_source_data_files": 69,
     "source_data_mapping": "source_data/PANEL_SOURCE_MAP.csv",
     "source_data_file_manifest": "source_data/FILE_MANIFEST.json",
     "revised_figure_stems": [
