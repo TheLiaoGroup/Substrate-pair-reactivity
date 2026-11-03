@@ -229,8 +229,12 @@ def compose_pdf(fig, pdf_path):
                          for line in block.get("lines", []) for span in line["spans"] if span["text"].strip()]
                 if artwork[0].get_images() or not fonts or not fonts.issubset(allowed_fonts):
                     raise ValueError(f"Native SVG conversion introduced raster content or nonstandard Arial: {name}: {fonts}")
-                if not spans or any(abs(span["size"] - 8) > 0.01 for span in spans):
+                water_digit = [span for span in spans if name == "grignard_addition"
+                               and span["text"] == "2" and abs(span["size"] - 6) < .01]
+                if not spans or any(abs(span["size"] - 8) > 0.01 and span not in water_digit for span in spans):
                     raise ValueError(f"Native SVG text does not retain its approved 8 pt physical size: {name}")
+                if name == "grignard_addition" and len(water_digit) != 1:
+                    raise ValueError("Grignard work-up requires exactly one 6 pt water subscript")
                 page.show_pdf_page(target, artwork, 0, keep_proportion=True, overlay=True)
         document.set_metadata({**document.metadata, "creationDate": "", "modDate": ""})
         result = document.tobytes(garbage=4, deflate=True, no_new_id=True)

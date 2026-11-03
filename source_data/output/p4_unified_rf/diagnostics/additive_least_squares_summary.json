@@ -1,0 +1,248 @@
+{
+  "per_screen": {
+    "Acylation": {
+      "row": {
+        "r2_least_squares": 0.5309242101936038,
+        "r2_backfitting": 0.5309242101936037,
+        "rf_skill_over_least_squares": 0.46344915590925045
+      },
+      "group": {
+        "r2_least_squares": 0.4959023318505567,
+        "r2_backfitting": 0.49602871650261166,
+        "rf_skill_over_least_squares": 0.3037932900831691
+      }
+    },
+    "Suzuki": {
+      "row": {
+        "r2_least_squares": 0.4502033599190846,
+        "r2_backfitting": 0.4502033599190839,
+        "rf_skill_over_least_squares": 0.16057399389994892
+      },
+      "group": {
+        "r2_least_squares": 0.2992888151777965,
+        "r2_backfitting": 0.2932390524053045,
+        "rf_skill_over_least_squares": 0.03875423751968714
+      }
+    },
+    "Buchwald-Hartwig": {
+      "row": {
+        "r2_least_squares": 0.37681361049182427,
+        "r2_backfitting": 0.37681361049182466,
+        "rf_skill_over_least_squares": 0.14341846844366996
+      },
+      "group": {
+        "r2_least_squares": 0.24424555588975333,
+        "r2_backfitting": 0.23835135346724265,
+        "rf_skill_over_least_squares": 0.14530302861485175
+      }
+    },
+    "Allylic-substitution": {
+      "row": {
+        "r2_least_squares": 0.30624716167943017,
+        "r2_backfitting": 0.3061580240440348,
+        "rf_skill_over_least_squares": -0.10520515788423875
+      },
+      "group": {
+        "r2_least_squares": -0.07511010501458544,
+        "r2_backfitting": -0.07281365191646375,
+        "rf_skill_over_least_squares": -0.08105392247239455
+      }
+    },
+    "C-O competitive reactions": {
+      "row": {
+        "r2_least_squares": 0.3394984646785602,
+        "r2_backfitting": 0.33949846467858974,
+        "rf_skill_over_least_squares": 0.12735669833469596
+      },
+      "group": {
+        "r2_least_squares": -0.0756863895531451,
+        "r2_backfitting": -0.07596152037194376,
+        "rf_skill_over_least_squares": 0.08977626398284196
+      }
+    },
+    "Chan-Lam": {
+      "row": {
+        "r2_least_squares": 0.39732564965389877,
+        "r2_backfitting": 0.3973333688330876,
+        "rf_skill_over_least_squares": 0.2838704395998488
+      },
+      "group": {
+        "r2_least_squares": 0.12856711048417607,
+        "r2_backfitting": 0.12412846393669083,
+        "rf_skill_over_least_squares": 0.2799247758092594
+      }
+    },
+    "Esterification": {
+      "row": {
+        "r2_least_squares": 0.47241305910196785,
+        "r2_backfitting": 0.4724130591019554,
+        "rf_skill_over_least_squares": 0.1194219762890572
+      },
+      "group": {
+        "r2_least_squares": 0.16314911468559634,
+        "r2_backfitting": 0.1500331326001896,
+        "rf_skill_over_least_squares": 0.3087251839622029
+      }
+    },
+    "Grignard": {
+      "row": {
+        "r2_least_squares": 0.5719414592024064,
+        "r2_backfitting": 0.5719414592024226,
+        "rf_skill_over_least_squares": 0.2537479517440704
+      },
+      "group": {
+        "r2_least_squares": -0.005478117274242011,
+        "r2_backfitting": -0.00261230047000874,
+        "rf_skill_over_least_squares": 0.011407420237339205
+      }
+    },
+    "Heck": {
+      "row": {
+        "r2_least_squares": 0.46319959356146423,
+        "r2_backfitting": 0.4631995935614645,
+        "rf_skill_over_least_squares": 0.21303645252584857
+      },
+      "group": {
+        "r2_least_squares": 0.38321437140327264,
+        "r2_backfitting": 0.3828387731797051,
+        "rf_skill_over_least_squares": 0.18772130791347422
+      }
+    },
+    "Hiyama": {
+      "row": {
+        "r2_least_squares": 0.26452295263234554,
+        "r2_backfitting": 0.2644382125637976,
+        "rf_skill_over_least_squares": 0.20824875434708529
+      },
+      "group": {
+        "r2_least_squares": 0.08578190597895552,
+        "r2_backfitting": 0.0772195552456849,
+        "rf_skill_over_least_squares": 0.17650073302951994
+      }
+    },
+    "Kumada": {
+      "row": {
+        "r2_least_squares": 0.5047995181814571,
+        "r2_backfitting": 0.5047995181814569,
+        "rf_skill_over_least_squares": 0.14798667533844775
+      },
+      "group": {
+        "r2_least_squares": 0.29856805197834785,
+        "r2_backfitting": 0.2843455164064815,
+        "rf_skill_over_least_squares": 0.010754168820067012
+      }
+    },
+    "Minisci": {
+      "row": {
+        "r2_least_squares": 0.45329655145302433,
+        "r2_backfitting": 0.45329655145310827,
+        "rf_skill_over_least_squares": -0.08136845224017523
+      },
+      "group": {
+        "r2_least_squares": 0.015175130250801949,
+        "r2_backfitting": -0.15275318054354342,
+        "rf_skill_over_least_squares": 0.004650627233485816
+      }
+    },
+    "Pd-carbonylation": {
+      "row": {
+        "r2_least_squares": 0.2877768666655586,
+        "r2_backfitting": 0.2877725999589684,
+        "rf_skill_over_least_squares": 0.3161350819169846
+      },
+      "group": {
+        "r2_least_squares": -0.7110472147619523,
+        "r2_backfitting": -0.7030157900680976,
+        "rf_skill_over_least_squares": 0.3166041351806352
+      }
+    },
+    "Reductive-amination": {
+      "row": {
+        "r2_least_squares": 0.4242177491294813,
+        "r2_backfitting": 0.42421774912947735,
+        "rf_skill_over_least_squares": 0.18377791322892534
+      },
+      "group": {
+        "r2_least_squares": 0.09734768861655725,
+        "r2_backfitting": 0.09299535764290405,
+        "rf_skill_over_least_squares": 0.23386751581905746
+      }
+    },
+    "SNAr": {
+      "row": {
+        "r2_least_squares": 0.5655635963006329,
+        "r2_backfitting": 0.5655634068722714,
+        "rf_skill_over_least_squares": 0.2753454774416578
+      },
+      "group": {
+        "r2_least_squares": 0.09104227067057677,
+        "r2_backfitting": 0.06941234707078156,
+        "rf_skill_over_least_squares": 0.29055082214481137
+      }
+    },
+    "Sonogashira": {
+      "row": {
+        "r2_least_squares": 0.534499903101272,
+        "r2_backfitting": 0.5345128600914129,
+        "rf_skill_over_least_squares": -0.0800968892001086
+      },
+      "group": {
+        "r2_least_squares": 0.11913877156360883,
+        "r2_backfitting": 0.11633626198429844,
+        "rf_skill_over_least_squares": 0.055019604616558235
+      }
+    },
+    "Suzuki Bpin": {
+      "row": {
+        "r2_least_squares": 0.6496503742909141,
+        "r2_backfitting": 0.6496585427857943,
+        "rf_skill_over_least_squares": 0.0073411273593842145
+      },
+      "group": {
+        "r2_least_squares": 0.14027199139881097,
+        "r2_backfitting": 0.12037968449070169,
+        "rf_skill_over_least_squares": 0.043887155262055444
+      }
+    },
+    "Ullmann": {
+      "row": {
+        "r2_least_squares": 0.5113600978348253,
+        "r2_backfitting": 0.5113586526792848,
+        "rf_skill_over_least_squares": 0.04557852966773268
+      },
+      "group": {
+        "r2_least_squares": 0.20060864483011365,
+        "r2_backfitting": 0.1852247004581975,
+        "rf_skill_over_least_squares": 0.1482079051890417
+      }
+    },
+    "Buchwald-Hartwig CMC": {
+      "row": {
+        "r2_least_squares": 0.36006533759451914,
+        "r2_backfitting": 0.3600653375958024,
+        "rf_skill_over_least_squares": -0.11256616553956271
+      },
+      "group": {
+        "r2_least_squares": -0.041664790942567455,
+        "r2_backfitting": -0.04805301289544902,
+        "rf_skill_over_least_squares": 0.2107634817062422
+      }
+    }
+  },
+  "subsets": {
+    "all_18": {
+      "screens": 19,
+      "max_abs_held_out_well_r2_difference_from_backfitting": 8.913763539536435e-05,
+      "screens_where_rf_beats_least_squares_on_new_combinations": 18,
+      "rho_pair_share_vs_rf_skill_over_least_squares_new_combinations": -0.3175438596491228,
+      "p_pair_share_vs_rf_skill_over_least_squares_new_combinations": 0.1852467926295408
+    },
+    "mean_yield_at_least_5pct": {
+      "screens": 11,
+      "max_abs_held_out_well_r2_difference_from_backfitting": 1.2956990140811087e-05,
+      "screens_where_rf_beats_least_squares_on_new_combinations": 11,
+      "rho_pair_share_vs_rf_skill_over_least_squares_new_combinations": -0.7000000000000001,
+      "p_pair_share_vs_rf_skill_over_least_squares_new_combinations": 0.01647097883651441
+    }
+  }
+}

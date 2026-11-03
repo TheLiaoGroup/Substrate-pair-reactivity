@@ -77,9 +77,9 @@
     {
       "name": "grignard_addition",
       "cdxml": "grignard_addition.cdxml",
-      "cdxml_sha256": "bffb08804d5af32c2ea85ff15cf4cfed5129289dcd2755644437d5a5d67f3d79",
+      "cdxml_sha256": "c4a54c44d92e500cb2af3af8ce9540c81c3b577a5c2c700ee9c90a20ed9bdd19",
       "svg": "grignard_addition.svg",
-      "svg_sha256": "0c1901299196b98bd6c70543aec8cb2b1258d981633fed85631bf70d25db8bde",
+      "svg_sha256": "c2f564a892219da349dc703b84bdb4e4d2cb1dbd661ac84af538302c115120d5",
       "width_pt": 196.5,
       "height_pt": 44.25,
       "svg_viewbox": [

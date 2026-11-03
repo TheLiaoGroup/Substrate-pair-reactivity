@@ -1,0 +1,20 @@
+screen,transformation,source_records,numerical_yields,quantified,zero_by_rule,detected_not_quantified,no_screen_record,observed_substrate_1_levels,observed_substrate_2_levels,condition_vocabulary_size
+Acylation,Acylation,114733,99378,88366,11012,15355,0,86,78,94
+Suzuki,Suzuki,41240,41229,41229,0,11,0,156,47,95
+Buchwald-Hartwig,Buchwald-Hartwig,53516,49694,47682,2012,3822,0,117,103,191
+Allylic-substitution,Allylic-substitution,5774,5122,5036,86,652,0,10,34,119
+C-O competitive reactions,C-O competitive reactions,10702,9021,8110,911,487,1194,32,20,96
+Chan-Lam,Chan-Lam,14081,13972,13723,249,109,0,77,51,116
+Esterification,Esterification,6249,6105,6105,0,117,27,43,23,95
+Grignard,Grignard,5793,5361,5301,60,432,0,23,53,47
+Heck,Heck,29615,27013,22988,4025,900,1702,30,61,95
+Hiyama,Hiyama,12792,11294,11208,86,61,1437,27,33,92
+Kumada,Kumada,18155,18069,18069,0,86,0,81,17,93
+Minisci,Minisci,1152,1152,1152,0,0,0,11,18,47
+Pd-carbonylation,Pd-carbonylation,3503,3480,3480,0,23,0,30,8,90
+Reductive-amination,Reductive-amination,8858,8858,8858,0,0,0,64,55,47
+SNAr,SNAr,20601,19366,17260,2106,982,253,97,84,49
+Sonogashira,Sonogashira,14691,14222,14114,108,469,0,44,103,190
+Suzuki Bpin,Suzuki,6672,6607,6606,1,65,0,71,46,95
+Ullmann,Ullmann,20964,20497,20495,2,467,0,45,122,95
+Buchwald-Hartwig CMC,Buchwald-Hartwig,17818,17630,17574,56,188,0,62,70,285

@@ -1,8 +1,7 @@
-"""Draw the Chem main Figures 1-5 and the graphical abstract from the released results, without fitting.
+"""Draw the main Figures 1-5 and the graphical abstract from the released results, without fitting.
 
-Run from the package directory:  python p4_chem_figures.py --output-dir figures
-Figure 1 is written as a layered, editable SVG (groups named by content) and converted to PDF and PNG; Figures 2-5
-and the graphical abstract are drawn with matplotlib. Fonts and panel labels follow p4_figure_style.py at 9 pt and 8 pt.
+Run from the package directory:  python p4_main_figures.py --output-dir figures
+All figures and the graphical abstract are drawn with matplotlib; Figure 1 is also written as SVG. Fonts and panel labels follow p4_figure_style.py at 9 pt and 8 pt.
 
 Colour semantics, used in every figure: teal = held-out wells; orange = new substrate pairs; purple = Grignard
 addition; green = esterification; grey = other arrays; filled / open marker = array mean yield >= 5% / < 5%.
@@ -27,7 +26,7 @@ from matplotlib.patches import Rectangle  # noqa: E402
 from rdkit import Chem  # noqa: E402
 
 import p4_figure_style as style  # noqa: E402
-import p4_structure_drawing as chem  # noqa: E402
+import p4_structure_drawing as structures  # noqa: E402
 
 PACKAGE = Path(__file__).resolve().parent
 OUTPUT = PACKAGE / "output"
@@ -41,6 +40,7 @@ OUT = PACKAGE / "figures"
 style.LETTER_SIZE, style.TITLE_SIZE, style.LABEL_SIZE, style.TEXT_SIZE = 9, 9, 8, 8
 style.TITLE_INDENT = 11
 style.use_style()
+plt.rcParams["hatch.linewidth"] = 0.5
 
 INK, GRAY = style.INK, style.GRAY
 TEAL, ORANGE = "#2E7F86", "#D08A3C"
@@ -55,6 +55,7 @@ NAMES = {
     "Reductive-amination": "Reductive amination", "Buchwald-Hartwig": "Buchwald–Hartwig",
     "Buchwald-Hartwig CMC": "Buchwald–Hartwig CMC", "Allylic-substitution": "Allylic substitution",
     "C-O competitive reactions": "C–O competitive", "Pd-carbonylation": "Pd carbonylation",
+    "SNAr": r"S$_{\mathrm{N}}$Ar",
 }
 HIGHLIGHT = {"Grignard": PURPLE, "Esterification": GREEN}
 
@@ -102,9 +103,16 @@ def despine(ax, keep=("left", "bottom")):
 
 
 def save(fig, stem: str):
-    style.finalize(fig, figure_name=stem)
+    if stem != "TOC":  # the TOC sets its own type sizes and colour cues
+        style.finalize(fig, figure_name=stem)
+    for label in fig.texts:
+        if label.get_gid() == "chemical-subscript":
+            label.set_fontsize(5.6)
     if stem == "Figure_2":
         for label in fig.texts:
+            if label.get_text() in ("B", "C"):
+                x, y = label.get_position()
+                label.set_position((x - 0.5 / (72 * fig.get_figwidth()), y))
             if label.get_text() == "C":
                 x, y = label.get_position()
                 label.set_position((x, y + 10.8 / (72 * fig.get_figheight())))
@@ -115,25 +123,41 @@ def save(fig, stem: str):
                 x, y = label.get_position()
                 label.set_position((x, y + 9.6 / (72 * fig.get_figheight())))
         style.check_text_bounds(fig)
+    if stem == "Figure_S2":
+        for label in fig.texts:
+            if label.get_text() == "B":
+                x, y = label.get_position()
+                label.set_position((x - 0.5 / (72 * fig.get_figwidth()), y))
+        style.check_text_bounds(fig)
     if stem == "Figure_4":
         for ax in fig.axes:
             for label in ax.texts:
                 if label.get_gid() == "pale-yield-number":
                     label.set_color("#4d565c")
     if stem == "TOC":
-        scores = [text for ax in fig.axes for text in ax.texts if text.get_gid() == "toc-score"]
-        if len(scores) != 2:
-            raise ValueError("The graphical abstract must have exactly two score labels")
-        for score in scores:
-            score.set_fontsize(16)
+        labels = [text for ax in fig.axes for text in ax.texts if text.get_text().strip()]
+        if sum(text.get_gid() == "toc-rho" for text in labels) != 1:
+            raise ValueError("The graphical abstract must state the rank correlation once")
+        small = [text.get_text() for text in labels if text.get_fontsize() < 6]
+        if small:
+            raise ValueError(f"TOC text below 6 pt: {small}")
         style.check_text_bounds(fig)
     fig.savefig(OUT / f"{stem}.pdf", metadata={"CreationDate": None, "ModDate": None})
-    if chem.compose_pdf(fig, OUT / f"{stem}.pdf"):
+    if stem == "Figure_1":
+        fig.savefig(OUT / "Figure_1.svg", metadata={"Date": None})
+    if structures.compose_pdf(fig, OUT / f"{stem}.pdf"):
         import pymupdf
         with pymupdf.open(OUT / f"{stem}.pdf") as document:
             document[0].get_pixmap(dpi=style.PNG_DPI).save(OUT / f"{stem}.png")
     else:
         fig.savefig(OUT / f"{stem}.png", dpi=style.PNG_DPI)
+    if stem == "TOC":
+        from PIL import Image
+        import pymupdf
+        with pymupdf.open(OUT / "TOC.pdf") as document:
+            pixmap = document[0].get_pixmap(dpi=600, alpha=False)
+            Image.frombytes("RGB", (pixmap.width, pixmap.height), pixmap.samples).save(
+                OUT / "TOC.tif", dpi=(600, 600), compression="tiff_lzw")
     plt.close(fig)
     print("wrote", OUT / f"{stem}.pdf")
 
@@ -144,7 +168,7 @@ def rho(a, b) -> float:
 
 
 SVG_GREY, SVG_LIGHT, CELL = "#7a8389", "#c3c8cd", "#d9dde1"
-W, H = 510, 214
+W, H = 504, 214
 
 
 def text(x, y, s, size=8, weight="normal", anchor="start", fill=INK, style=""):
@@ -154,7 +178,7 @@ def text(x, y, s, size=8, weight="normal", anchor="start", fill=INK, style=""):
 
 
 def svg_reagent_label(x, y, pieces):
-    """Use positioned Arial digits because the system font lacks Unicode subscripts."""
+    """Use smaller, lowered Arial digits rather than unavailable Unicode glyphs."""
     from matplotlib.font_manager import FontProperties, findfont
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
@@ -162,12 +186,14 @@ def svg_reagent_label(x, y, pieces):
     font_name = "ChemArialMetrics"
     if font_name not in pdfmetrics.getRegisteredFontNames():
         pdfmetrics.registerFont(TTFont(font_name, findfont(FontProperties(family="Arial"), fallback_to_default=False)))
-    widths = [pdfmetrics.stringWidth(token, font_name, 8) for token, _ in pieces]
+    widths = [pdfmetrics.stringWidth(token, font_name, 5.6 if lowered else 8)
+              for token, lowered in pieces]
     cursor = x - sum(widths) / 2
     spans = []
     for (token, subscript), width in zip(pieces, widths):
         offset = 1.8 if subscript else 0
-        spans.append(f'<tspan x="{cursor:.4f}" y="{y + offset:.1f}">{escape(token)}</tspan>')
+        spans.append(f'<tspan x="{cursor:.4f}" y="{y + offset:.1f}" '
+                     f'font-size="{5.6 if subscript else 8}">{escape(token)}</tspan>')
         cursor += width
     return (f'<text x="{x:.1f}" y="{y:.1f}" font-family="Arial" font-size="8" '
             f'text-anchor="start" fill="{INK}">' + "".join(spans) + '</text>')
@@ -249,135 +275,137 @@ def overview_svg_cell(x, y, width, height, value, missing=False):
 
 
 def figure1():
-    """The approved V5 layout, populated from the measured cells and unrounded array scores."""
+    """Overview: the question, the approach and the four findings, without a single-reaction entry point."""
+    from matplotlib.patches import FancyBboxPatch
     table = structure()
-    high = table[table.high].copy()
-    high["row_rank"] = high.rf_row_r2.rank(ascending=False).astype(int)
-    high["group_rank"] = high.rf_group_r2.rank(ascending=False).astype(int)
-    ranks = high.set_index("screen")
-    rho11 = high[["rf_row_r2", "rf_group_r2"]].corr(method="spearman").iloc[0, 1]
-    assert int(table.numeric_records.sum()) == 378070 and len(table) == 19
-    assert (ranks.loc["Grignard", "row_rank"], ranks.loc["Grignard", "group_rank"]) == (2, 11)
-    assert (ranks.loc["Buchwald-Hartwig", "row_rank"], ranks.loc["Buchwald-Hartwig", "group_rank"]) == (11, 4)
-    grignard = ranks.loc["Grignard"]
-    values, missing, means = overview_data()
+    high = table[table.high].set_index("screen")
+    held = high.rf_row_r2.rank(ascending=False).astype(int)
+    new = high.rf_group_r2.rank(ascending=False).astype(int)
+    assert (held["Grignard"], new["Grignard"]) == (2, 11)
+    rho11 = rho(high.rf_row_r2, high.rf_group_r2)
+    assert f"{rho11:.2f}" == "0.02"
+    medians = high[["row_pair_level_r2", "group_pair_level_r2", "row_within_pair_r2", "group_within_pair_r2"]].median()
+    assert [f"{v:.2f}" for v in medians] == ["0.83", "0.23", "0.34", "0.33"]
+    external = load_json(OUTPUT / "p4_external" / "external_hte_summary.json")
+    cn, sm = external["Buchwald-Hartwig (Ahneman et al.)"], external["Suzuki-Miyaura (Perera et al.)"]
+    assert [f"{v:.2f}" for v in (cn["row_r2"], cn["group_r2"], sm["row_r2"], sm["group_r2"])] == \
+        ["0.91", "0.70", "0.84", "0.04"]
+    combined = high.pair_variance_share.rank() + high.substrate_levels_per_pair.rank()
+    rho_table = rho(combined, high.rf_delta_r2)
+    assert f"{rho_table:.2f}" == "0.84"
+    corpus = int(table.numeric_records.sum())
+    assert corpus == 378070
+    values, _, _ = overview_data()
+    cells = values[np.ix_([0, 1, 2, 4, 5, 6], range(8))]
+    assert np.isfinite(cells).all()
+    down, up, flat = "#C8553D", "#2F5D8C", "#D5D9DE"
 
-    def title(x, y, letter, words):
-        return text(x, y, letter, size=9, weight="bold") + text(x + 11, y, words, size=9, weight="bold")
+    fig = plt.figure(figsize=(WIDTH, 4.3))
+    grid = GridSpec(2, 4, figure=fig, height_ratios=[0.82, 1.08], hspace=0.55, wspace=0.55,
+                    left=0.035, right=0.985, top=0.925, bottom=0.085)
 
-    parts = []
-    # A: both branches begin at the same highlighted first row.
-    body = title(2, 11, "A", "One pair, two tests")
-    tx, ty, cell, cell_size = 86, 38, 7.4, 6.6
-    cells = ""
-    for i in range(8):
-        for j in range(12):
-            cells += overview_svg_cell(tx + j * cell, ty + i * cell, cell_size, cell_size,
-                                       values[i, j], missing[i, j])
-    body += group("A-measured-cells", cells)
-    body += rect(tx - 1.2, ty - 1.2, 90.4, 9.0, stroke=PURPLE, sw=1.1)
-    body += text(tx, 110.2, "Grignard yields, 8 of 136 pairs", fill=SVG_GREY)
-    first_y, last_y = ty + cell_size / 2, ty + 7 * cell + cell_size / 2
-    molecules = chem.svg_group("chloronicotinaldehyde", 12.5, 12.575)
-    molecules += svg_reagent_label(44, 69, (("+ 4-FC", False), ("6", True), ("H", False),
-                                           ("4", True), ("MgBr", False)))
-    molecules += text(44, 79.5, f"pair mean {means.iloc[0] * 100:.0f}%", anchor="middle")
-    molecules += line(79.5, first_y, tx - 3, first_y, sw=0.5)
-    low_height = chem.extent("methylamino_acetophenone")[1] * 72
-    low_offset = 24
-    low_y = last_y + low_offset
-    molecules += chem.svg_group("methylamino_acetophenone", 0.5, low_y - low_height / 2)
-    molecules += svg_reagent_label(44, 121 + low_offset, (("+ 4-Me", False), ("2", True), ("NC", False),
-                                   ("6", True), ("H", False), ("4", True), ("MgBr", False)))
-    molecules += text(44, 131.5 + low_offset, f"pair mean {means.iloc[-1] * 100:.0f}%", anchor="middle")
-    molecules += line(81.5, low_y, tx - 3, low_y, sw=0.5)
-    molecules += line(tx - 3, low_y, tx - 3, last_y, sw=0.5)
-    body += group("A-native-chemistry", molecules)
-    for y, value, flagged, label in ((144, 0, False, "0% yield"),
-                                    (157, np.nan, False, "No record")):
-        body += overview_svg_cell(tx, y, 7, 7, value, flagged)
-        body += text(tx + 11, y + 6.5, label, fill=SVG_GREY)
+    def cell(ax, x, y, size, face, edge="none", lw=0.0):
+        ax.add_patch(FancyBboxPatch((x, y), size, size, boxstyle="round,pad=0,rounding_size=0.25",
+                                    facecolor=face, edgecolor=edge, lw=lw, zorder=3 if lw else 2))
 
-    sx, step = 201, 7.4
-    branches = arrow(tx + 12 * cell + 2, first_y, sx - 4, 48, c1=(sx - 12, 48))
-    branches += arrow(tx + 12 * cell + 2, first_y, sx - 4, 92, c1=(sx - 12, 92))
-    branches += text(sx, 37, "Held-out wells", weight="bold")
-    for j, value in enumerate(values[0]):
-        hidden = j in (2, 6, 9)
-        branches += rect(sx + j * step + (0.6 if hidden else 0), 43 + (0.6 if hidden else 0),
-                         5.6 if hidden else 6.6, 8.8 if hidden else 10,
-                         fill="white" if hidden else overview_colour(value),
-                         stroke=TEAL if hidden else "none", sw=1.0)
-    branches += text(sx, 81, "New pairs", weight="bold")
-    branches += rect(sx + 0.6, 87.6, 87.4, 8.8, fill="white", stroke=ORANGE, sw=1.2)
-    branches += text(sx + 44.4, 95, "?", anchor="middle", weight="bold")
-    body += group("A-two-test-branches", branches)
-    scores = text(sx, 119, "Grignard array, R²", weight="bold")
-    score_scale = 76.0
-    for y, label, score, colour in ((138, "Held-out wells", grignard.rf_row_r2, TEAL),
-                                     (164, "New pairs", grignard.rf_group_r2, ORANGE)):
-        width = float(score) * score_scale
-        scores += line(sx, y - 1, sx, y + 9, sw=0.5)
-        scores += text(sx, y - 4, label, fill=SVG_GREY)
-        scores += group("A-score-" + ("held-out" if colour == TEAL else "new-pairs"),
-                        rect(sx, y, width, 8, fill=colour))
-        scores += text(sx + width + 4, y + 7, f"{score:.2f}", size=9, weight="bold")
-    body += group("A-common-zero-scores", scores)
-    parts.append(group("A-one-pair-two-tests", body))
+    def yield_table(ax, x0, y0, step, mode):
+        hidden = {(1, 2), (3, 5), (0, 6), (4, 1), (2, 4)}
+        for i in range(6):
+            for j in range(8):
+                x, y = x0 + j * step, y0 + (5 - i) * step
+                if mode == "pair" and i == 2:
+                    continue
+                if mode == "wells" and (i, j) in hidden:
+                    cell(ax, x + .1, y + .1, step - .35, "white", TEAL, 1.0)
+                else:
+                    cell(ax, x + .1, y + .1, step - .35, OVERVIEW_CMAP(0.12 + 0.88 * cells[i, j]))
+        if mode == "pair":
+            ax.add_patch(FancyBboxPatch((x0 + .1, y0 + 3 * step + .1), 8 * step - .35, step - .35,
+                                        boxstyle="round,pad=0,rounding_size=0.3", facecolor="white",
+                                        edgecolor=ORANGE, lw=1.1, zorder=3))
+            ax.text(x0 + 4 * step, y0 + 3.5 * step, "?", ha="center", va="center", color=INK, weight="bold",
+                    zorder=4)
 
-    # B: rankings use the five-seed mean scores of all 11 higher-yield arrays.
-    lx0, lx1, ly0, step = 388, 412, 41, 12.2
-    body = title(280, 11, "B", "The ranking of reactions flips")
-    body += text(lx0 - 4, 29, "held-out", anchor="end", fill=SVG_GREY)
-    body += text(lx1 + 4, 29, "new pairs", fill=SVG_GREY)
-    order = sorted(ranks.index, key=lambda s: (s in ("Grignard", "Buchwald-Hartwig"), s))
-    for screen in order:
-        r, g = ranks.loc[screen, "row_rank"], ranks.loc[screen, "group_rank"]
-        stroke, sw = SVG_LIGHT, 0.7
-        if screen == "Grignard":
-            stroke, sw = PURPLE, 2.0
-        elif screen == "Buchwald-Hartwig":
-            stroke, sw = INK, 1.4
-        body += line(lx0, ly0 + (r - 1) * step, lx1, ly0 + (g - 1) * step, stroke=stroke, sw=sw)
-        emphasized = screen in ("Grignard", "Buchwald-Hartwig")
-        left_name, right_name = name(screen), name(screen)
-        if emphasized:
-            ordinal = {2: "2nd", 4: "4th", 11: "11th"}
-            left_name += " " + ordinal[r]
-            right_name = ordinal[g] + " " + right_name
-        body += text(lx0 - 7, ly0 + (r - 1) * step + 3, left_name, anchor="end",
-                     weight="bold" if emphasized else "normal", fill=INK if emphasized else SVG_GREY)
-        body += text(lx1 + 7, ly0 + (g - 1) * step + 3, right_name,
-                     weight="bold" if emphasized else "normal", fill=INK if emphasized else SVG_GREY)
-    for k in range(11):
-        for x in (lx0, lx1):
-            body += f'<circle cx="{x}" cy="{ly0 + k * step:.1f}" r="1.5" fill="{SVG_GREY}"/>'
-    body += text(400, 183, f"ρ = {rho11:.2f}", size=9, anchor="middle", weight="bold")
-    parts.append(group("B-ranks", body))
+    # A: the question
+    ax = fig.add_subplot(grid[0, 0:2])
+    style.panel_title(ax, "A  The usual test keeps most pairs in training")
+    ax.set(xlim=(0, 100), ylim=(0, 46)); ax.axis("off")
+    yield_table(ax, 4, 14, 4.2, "wells")
+    yield_table(ax, 60, 14, 4.2, "pair")
+    ax.text(21, 45, "Usual test: hide single wells", ha="center", va="top", color=INK, weight="bold")
+    ax.text(77, 45, "Needed: predict a pair never run", ha="center", va="top", color=INK, weight="bold")
+    ax.text(21, 10, "most hidden wells' pairs\nstay in training", ha="center", va="top",
+            color=GRAY, linespacing=1.15)
+    ax.text(77, 10, "the pair has never\nbeen measured", ha="center", va="top", color=GRAY,
+            linespacing=1.15)
+    ax.text(49, 27, "vs", ha="center", va="center", color=GRAY)
 
-    # C: compact visual pointers to the two full-table properties in Figure 5.
-    body = title(2, 202, "C", "Read before modelling:")
-    dark, mid, pale = "#55606a", "#a4acb2", "#dde1e4"
-    ix, iy, ic = 140, 191, 3.6
-    for i, shade in enumerate((dark, mid, pale, mid)):
-        for j in range(5):
-            body += rect(ix + j * ic, iy + i * ic, 3.1, 3.1, fill=shade)
-    body += text(163, 202, "between-pair share")
-    ix, iy2 = 252, 191
-    filled = {(0, 0), (0, 4), (1, 1), (2, 2), (2, 3), (3, 4)}
-    for i in range(4):
-        for j in range(5):
-            body += rect(ix + j * ic, iy2 + i * ic, 3.1, 3.1, fill=dark if (i, j) in filled else "white",
-                         stroke="none" if (i, j) in filled else SVG_LIGHT, sw=0.5)
-    body += text(275, 202, "pairing sparsity")
-    body += text(352, 202, "(Figure 5)", fill=SVG_GREY)
-    parts.append(group("C-properties", body))
+    # B: the approach
+    ax = fig.add_subplot(grid[0, 2:4])
+    style.panel_title(ax, "B  Two tests, accuracy split at the pair")
+    ax.set(xlim=(0, 100), ylim=(0, 46)); ax.axis("off")
+    ax.text(50, 45, f"{corpus:,} yields · 17 transformations · one platform", ha="center", va="top", color=INK,
+            weight="bold")
+    row = values[0]
+    for j, value in enumerate(row):
+        cell(ax, 20 + j * 5, 30, 4.6, OVERVIEW_CMAP(0.12 + 0.88 * value))
+    ax.text(18, 32.3, "one pair,\n12 conditions", ha="right", va="center", color=GRAY, linespacing=1.15)
+    mean = float(np.mean(row))
+    for x in (30, 70):
+        ax.annotate("", xy=(x, 22), xytext=(50, 29), arrowprops={"arrowstyle": "-|>", "color": GRAY, "lw": 0.8})
+    ax.add_patch(Rectangle((22, 12), 16 * mean / max(row), 5, facecolor="#55606a", lw=0))
+    ax.text(30, 9, "pair level:\nmean yield", ha="center", va="top", color=INK, linespacing=1.15)
+    for k, value in enumerate(row):
+        dy = (value - mean) * 14
+        ax.plot([60 + 2 * k] * 2, [15, 15 + dy], color=GRAY, lw=1.1, solid_capstyle="butt")
+    ax.plot([59, 83], [15, 15], color=LIGHT, lw=0.6)
+    ax.text(72, 9, "within pair:\nresponse to conditions", ha="center", va="top", color=INK, linespacing=1.15)
 
-    svg = (f'<svg xmlns="http://www.w3.org/2000/svg" width="180mm" height="{180 * H / W:.12g}mm" '
-           f'viewBox="0 0 {W} {H}">\n'
-           f'<rect width="{W}" height="{H}" fill="white"/>\n' + "".join(parts) + "</svg>\n")
-    (OUT / "Figure_1.svg").write_text(svg, encoding="utf-8")
-    print("wrote", OUT / "Figure_1.svg")
+    # C: rank flip
+    ax = fig.add_subplot(grid[1, 0])
+    style.panel_title(ax, "C  Rankings flip")
+    for screen in high.index:
+        d = new[screen] - held[screen]
+        colour = down if d >= 3 else up if d <= -3 else flat
+        ax.plot([0, 1], [held[screen], new[screen]], color=colour, lw=1.5 if abs(d) >= 3 else 0.8,
+                solid_capstyle="round", zorder=3 if abs(d) >= 3 else 2)
+    ax.scatter([0] * 11, range(1, 12), s=8, color=TEAL, lw=0, zorder=4)
+    ax.scatter([1] * 11, range(1, 12), s=8, color=ORANGE, lw=0, zorder=4)
+    ax.text(0, 12.6, "held-out\nwells", ha="center", va="top", color=INK, linespacing=1.1)
+    ax.text(1, 12.6, "new\npairs", ha="center", va="top", color=INK, linespacing=1.1)
+    ax.text(0.5, -0.2, f"11 reactions, ρ = {rho11:.2f}", ha="center", va="bottom", color=INK, weight="bold")
+    ax.set(xlim=(-0.25, 1.25), ylim=(14.2, -0.6)); ax.axis("off")
+
+    def bars(ax, labels, pairs, ylim):
+        for k, (a, b) in enumerate(pairs):
+            for dx, v, colour in ((-0.22, a, TEAL), (0.22, b, ORANGE)):
+                ax.bar(k + dx, v, width=0.42, color=colour, lw=0)
+                ax.text(k + dx, max(v, 0) + 0.03, f"{v:.2f}", ha="center", va="bottom", color=INK)
+        ax.set_xticks(range(len(labels)), labels)
+        ax.set_xlim(-0.55, len(labels) - 0.45)
+        ax.set_ylim(*ylim)
+        ax.axhline(0, color=GRAY, lw=0.6)
+        despine(ax)
+        ax.set_ylabel("R²")
+
+    ax = fig.add_subplot(grid[1, 1])
+    style.panel_title(ax, "D  The loss is the pair level")
+    bars(ax, ["pair\nlevel", "within\npair"], [(medians.iloc[0], medians.iloc[1]), (medians.iloc[2], medians.iloc[3])],
+         (0, 1.05))
+    ax = fig.add_subplot(grid[1, 2])
+    style.panel_title(ax, "E  Public datasets too")
+    bars(ax, ["C–N\n(ref. 13)", "Suzuki\n(ref. 2)"], [(cn["row_r2"], cn["group_r2"]), (sm["row_r2"], sm["group_r2"])],
+         (0, 1.05))
+
+    ax = fig.add_subplot(grid[1, 3])
+    style.panel_title(ax, "F  Table properties\ntrack the loss")
+    ax.scatter(combined, high.rf_delta_r2, s=16, color=MID, lw=0, zorder=3)
+    ax.text(0.05, 0.95, f"ρ = {rho_table:.2f}", transform=ax.transAxes, ha="left", va="top", color=INK,
+            weight="bold")
+    ax.set_xlabel("table rank sum")
+    ax.set_ylabel("R² lost")
+    despine(ax)
+    save(fig, "Figure_1")
 
 
 def motif_row(ax, x, y, hidden, cells=6, width=0.6, height=0.42):
@@ -419,7 +447,7 @@ def figure2():
 
     # a: rank slope chart (hero)
     ax = fig.add_subplot(grid[:, 0])
-    style.panel_title(ax, "A  Grignard falls from 2nd to 11th")
+    style.panel_title(ax, "A  Two tests rank 11 reactions in unrelated orders")
     order = [s for s in high.sort_values("row_rank").screen]
     for screen in order:
         r, g = ranks.loc[screen, "row_rank"], ranks.loc[screen, "group_rank"]
@@ -498,8 +526,8 @@ PAIR_DY, WITHIN_DY = -0.17, 0.17
 def dumbbell(ax, y, row_pair, group_pair, row_within, group_within, size=1.0):
     ax.plot([row_pair, group_pair], [y + PAIR_DY] * 2, color="#55606a", lw=1.6 * size, zorder=1,
             solid_capstyle="round")
-    ax.scatter([row_pair], [y + PAIR_DY], s=24 * size, color=TEAL, zorder=3, edgecolor="white", linewidths=0.4)
-    ax.scatter([group_pair], [y + PAIR_DY], s=24 * size, color=ORANGE, zorder=3, edgecolor="white", linewidths=0.4)
+    ax.scatter([row_pair], [y + PAIR_DY], s=24 * size, color=TEAL, zorder=3, edgecolor="white", linewidths=0.5)
+    ax.scatter([group_pair], [y + PAIR_DY], s=24 * size, color=ORANGE, zorder=3, edgecolor="white", linewidths=0.5)
     ax.plot([row_within, group_within], [y + WITHIN_DY] * 2, color=LIGHT, lw=1.0 * size, zorder=1)
     ax.scatter([row_within], [y + WITHIN_DY], s=20 * size, marker="^", facecolor="white", edgecolor=TEAL,
                linewidths=1.0, zorder=3)
@@ -536,7 +564,7 @@ def figure3():
         ax.text(-0.3, y, f"{name(row.screen)}  {100 * row.pair_variance_share:.0f}%", ha="right", va="center",
                 color=INK, weight="bold" if row.screen == "Grignard" else "normal")
     ext_y = len(rows) + 0.9
-    for i, (label, key) in enumerate([("C–N coupling, ref. 11", "Buchwald-Hartwig (Ahneman et al.)"),
+    for i, (label, key) in enumerate([("C–N coupling, ref. 13", "Buchwald-Hartwig (Ahneman et al.)"),
                                       ("Suzuki coupling, ref. 2", "Suzuki-Miyaura (Perera et al.)")]):
         e = external[key]
         y = ext_y + i
@@ -552,7 +580,7 @@ def figure3():
     for k, dy in enumerate((0.1, -0.08, 0.12, -0.1, 0.06)):
         ax.plot([0.215 + 0.03 * k] * 2, [-0.52, -0.52 - dy], color=GRAY, lw=1.0, solid_capstyle="butt",
                 clip_on=False)
-    ax.plot([0.2, 0.35], [-0.52, -0.52], color=LIGHT, lw=0.4, clip_on=False)
+    ax.plot([0.2, 0.35], [-0.52, -0.52], color=LIGHT, lw=0.5, clip_on=False)
     ax.text(0.4, -0.52, "within pair (triangles)", ha="left", va="center", color=INK)
     ax.set_xlim(-0.3, 1.02)
     ax.set_ylim(ext_y + 1.6, -1.1)
@@ -585,12 +613,12 @@ def figure3():
     lim = (0.15, 0.8)
     ax.plot(lim, lim, ls=(0, (3, 2)), color=GRAY, lw=0.7, zorder=1)
     add = high.screen.map(lambda s: additive[s]["row"]["r2_additive"])
-    ax.scatter(high.rf_row_r2, add, s=24, marker="s", color=TEAL, edgecolor="white", linewidths=0.4, zorder=3)
+    ax.scatter(high.rf_row_r2, add, s=24, marker="s", color=TEAL, edgecolor="white", linewidths=0.5, zorder=3)
     ax.scatter(high.rf_row_r2, high.row_sister_well_mean_r2, s=26, marker="D", facecolor="white", edgecolor=TEAL,
                linewidths=1.0, zorder=3)
     ratio_add = (add / high.rf_row_r2).median()
     ratio_sister = (high.row_sister_well_mean_r2 / high.rf_row_r2).median()
-    ax.scatter([0.18], [0.785], s=24, marker="s", color=TEAL, edgecolor="white", linewidths=0.4)
+    ax.scatter([0.18], [0.785], s=24, marker="s", color=TEAL, edgecolor="white", linewidths=0.5)
     ax.text(0.2, 0.785, f"identities only: {100 * ratio_add:.0f}%", ha="left", va="center", color=INK)
     ax.scatter([0.18], [0.735], s=26, marker="D", facecolor="white", edgecolor=TEAL, linewidths=1.0)
     ax.text(0.2, 0.735, f"pair's other wells: {100 * ratio_sister:.0f}%", ha="left", va="center",
@@ -648,7 +676,7 @@ EXAMPLES = [
 
 
 def reagent_label(fig, centre_x, baseline_y, formula):
-    """Lower ordinary Arial digits at 8 pt; system Arial lacks subscript glyphs."""
+    """Set smaller, lowered Arial digits at the native print size."""
     subscripts = str.maketrans("₀₁₂₃₄₅₆₇₈₉", "0123456789")
     segments = []
     for character in "+ " + formula:
@@ -660,14 +688,15 @@ def reagent_label(fig, centre_x, baseline_y, formula):
             segments.append((value, lowered))
     from matplotlib.font_manager import FontProperties
     renderer = fig.canvas.get_renderer()
-    font = FontProperties(family="Arial", size=8)
-    widths = [renderer.get_text_width_height_descent(value, font, False)[0] / fig.dpi
-              for value, _ in segments]
+    widths = [renderer.get_text_width_height_descent(
+        value, FontProperties(family="Arial", size=5.6 if lowered else 8), False)[0] / fig.dpi
+        for value, lowered in segments]
     cursor = centre_x - sum(widths) / 2
     for (value, lowered), width in zip(segments, widths):
         fig.text(cursor / fig.get_figwidth(),
                  (baseline_y - (1.8 / 72 if lowered else 0)) / fig.get_figheight(),
-                 value, ha="left", va="baseline", color=INK, fontsize=8)
+                 value, ha="left", va="baseline", color=INK, fontsize=5.6 if lowered else 8,
+                 gid="chemical-subscript" if lowered else None)
         cursor += width
 
 
@@ -736,8 +765,8 @@ def block_panel(fig, frame, grid, flags, rows, cols, colour, scheme, name_, tabl
     values = grid.values[np.ix_(rows, cols)] * 100
     missing = flags[np.ix_(rows, cols)]
     # scheme header
-    sw, sh = chem.extent(scheme)
-    chem.place(fig, scheme, centre_in=(bx + sw / 2 - 0.05, top - 0.12 - sh / 2))
+    sw, sh = structures.extent(scheme)
+    structures.place(fig, scheme, centre_in=(bx + sw / 2 - 0.05, top - 0.12 - sh / 2))
     # block
     ax = fig.add_axes([bx / fig_w, (by_top - bh) / fig_h, bw / fig_w, bh / fig_h])
     ax.imshow(values, cmap=BLOCK_CMAP, vmin=0, vmax=100, aspect="auto", interpolation="nearest")
@@ -828,7 +857,7 @@ def stacked_pair_positions(ax, values, row, separation_pt=3.5):
 
 
 def figure4():
-    plt.rcParams["hatch.linewidth"] = 0.3
+    plt.rcParams["hatch.linewidth"] = 0.5
     table = structure().set_index("screen")
     data = records(["Grignard", "Esterification"])
     grignard, g_flags, g_analysed = matrix(data[data.screen == "Grignard"])
@@ -883,7 +912,7 @@ def figure4():
     fig_w, fig_h = WIDTH, fig.get_figheight()
     col_w = gb.width * fig_w / 4
     left_in = gb.x0 * fig_w
-    box_h = [max(chem.extent(e[2])[1] for e in examples[4 * r:4 * r + 4]) for r in range(2)]
+    box_h = [max(structures.extent(e[2])[1] for e in examples[4 * r:4 * r + 4]) for r in range(2)]
     row_heights = [height + 0.42 for height in box_h]
     spare = gb.height * fig_h - sum(row_heights)
     if spare < 0:
@@ -893,11 +922,11 @@ def figure4():
         r, c = divmod(k, 4)
         cx = left_in + (c + 0.5) * col_w
         top_in = (gb.y0 + gb.height) * fig_h - sum(row_heights[:r])
-        ex, ey = chem.extent(asset)
+        ex, ey = structures.extent(asset)
         if ex > col_w - 0.08 or box_h[r] + 0.42 > row_heights[r]:
             raise ValueError(f"Native structure needs more gallery space: {asset}")
         cy = top_in - 0.06 - box_h[r] / 2
-        chem.place(fig, asset, centre_in=(cx, cy))
+        structures.place(fig, asset, centre_in=(cx, cy))
         fig.text((cx - col_w / 2 + 0.12) / fig_w, (top_in - 0.02) / fig_h, str(k + 1), ha="left", va="top",
                  weight="bold", color=INK)
         base = top_in - 0.06 - box_h[r]
@@ -978,14 +1007,15 @@ def figure5():
 
     # A: both properties at once; circle area is the loss
     ax = fig.add_subplot(grid[0, 0])
-    style.panel_title(ax, "A  Pair-led, sparsely paired arrays lose more")
+    style.panel_title(ax, "A  Pair variation and sparse pairing")
     area = lambda loss: 700 * loss  # noqa: E731  marker area in points^2, proportional to the loss
     for row in high.sort_values("rf_delta_r2", ascending=False).itertuples():
         colour = HIGHLIGHT.get(row.screen, MID)
         ax.scatter(row.pair_pct, row.substrate_levels_per_pair, s=area(row.rf_delta_r2), color=colour,
                    alpha=0.85 if row.screen in HIGHLIGHT else 0.5, edgecolor="white", linewidths=0.6, zorder=3)
     for screen, (dx, dy, ha) in {"Grignard": (0, 17, "center"), "Esterification": (0, 9, "center"),
-                                 "Heck": (7, 0, "left"), "Suzuki Bpin": (0, 12, "center")}.items():
+                                 "Heck": (7, 0, "left"), "Suzuki Bpin": (13, 9, "left"),
+                                 "Sonogashira": (-4, 14, "right")}.items():
         row = high.set_index("screen").loc[screen]
         ax.annotate(name(screen), (row.pair_pct, row.substrate_levels_per_pair), xytext=(dx, dy),
                     textcoords="offset points", ha=ha, va="center", color=INK,
@@ -1004,7 +1034,7 @@ def figure5():
 
     # B, C: each property alone against the loss, all 19 arrays
     for spec, column, title, rho11, rho19, xlabel, xlim in (
-            (grid[0, 1], "pair_pct", "B  Pair-led yields lose more", r_share, r_share19,
+            (grid[0, 1], "pair_pct", "B  Between-pair variation", r_share, r_share19,
              "Between-pair share, %", (20, 75)),
             (grid[0, 2], "substrate_levels_per_pair", "C  Sparse pairing loses more", r_levels, r_levels19,
              "Pairing sparsity", (0, 1.05))):
@@ -1026,47 +1056,75 @@ def figure5():
 
 
 def toc():
-    """Compact graphical abstract: hide a few wells or the whole row of the same measured pair."""
-    table = structure().set_index("screen")
+    """Graphical abstract (115 x 25 mm): the two tests and rankings of the 11 higher-yield arrays."""
+    table = structure()
+    high = table[table.high].set_index("screen")
+    held = high.rf_row_r2.rank(ascending=False).astype(int)
+    new = high.rf_group_r2.rank(ascending=False).astype(int)
+    assert sorted(held) == list(range(1, 12)) and sorted(new) == list(range(1, 12))
+    assert (held["Grignard"], new["Grignard"]) == (2, 11) and (held["Buchwald-Hartwig"], new["Buchwald-Hartwig"]) == (11, 4)
+    rho11 = rho(high.rf_row_r2, high.rf_group_r2)
+    assert f"{rho11:.2f}" == "0.02"
     values, _, _ = overview_data()
-    g = table.loc["Grignard"]
-    size = 3.3
-    fig = plt.figure(figsize=(size, size))
+    cells = values[np.ix_([0, 1, 2, 4, 5, 6], range(8))]  # measured yields; row 3 has a no-record cell
+    assert np.isfinite(cells).all()
+
+    width, height = 115 / 25.4, 25 / 25.4
+    fig = plt.figure(figsize=(width, height))
     ax = fig.add_axes([0, 0, 1, 1])
-    extent = size * 72
-    ax.set(xlim=(0, extent), ylim=(extent, 0))
+    ax.set(xlim=(0, width * 72), ylim=(0, height * 72))
     ax.axis("off")
-    _, scheme_h = chem.extent("grignard_addition")
-    chem.place(fig, "grignard_addition", centre_in=(size / 2, size - 14 / 72 - scheme_h / 2))
-    ax.text(extent / 2, 78, "Same pair, 12 conditions", ha="center", va="baseline", color=INK)
-    row_x, row_y, row_step = (extent - 120) / 2, 86, 10
-    for j, value in enumerate(values[0]):
-        ax.add_patch(Rectangle((row_x + j * row_step, row_y), 9.2, 10,
-                               facecolor=overview_colour(value), lw=0))
-    ax.add_patch(Rectangle((row_x - 1.3, row_y - 1.3), 121.8, 12.6,
-                           facecolor="none", edgecolor=PURPLE, lw=0.8))
-    for centre in (58, extent - 58):
-        ax.annotate("", xy=(centre, 129), xytext=(extent / 2, 102),
-                    arrowprops={"arrowstyle": "-|>", "color": GRAY, "lw": 0.8,
-                                "connectionstyle": "arc3,rad=0"})
-    for left, centre, label, colour, score, whole in (
-            (13, 58, "Held-out wells", TEAL, g.rf_row_r2, False),
-            (extent - 103, extent - 58, "New pairs", ORANGE, g.rf_group_r2, True)):
-        ax.text(centre, 141, label, ha="center", va="baseline", color=INK, weight="bold")
-        if whole:
-            ax.add_patch(Rectangle((left, 149), 90, 10, facecolor="white", edgecolor=colour, lw=1))
-            ax.text(centre, 154, "?", ha="center", va="center", color=INK, weight="bold")
-        else:
-            for j, value in enumerate(values[0]):
-                hidden = j in (2, 6, 9)
-                ax.add_patch(Rectangle((left + j * 7.5, 149), 6.7, 10,
-                                       facecolor="white" if hidden else overview_colour(value),
-                                       edgecolor=colour if hidden else "none", lw=1 if hidden else 0))
-        ax.text(centre, 178, f"{score:.2f}", ha="center", va="baseline", color=INK, weight="bold", fontsize=16,
-                gid="toc-score")
-    ax.text(extent / 2, 197, "Grignard array, R²", ha="center", va="baseline", color=GRAY)
-    ax.text(extent / 2, 222, "Read the yield table before modelling", ha="center", va="baseline",
-            color=INK, weight="bold")
+    down, up, flat = "#C8553D", "#2F5D8C", "#D5D9DE"
+    from matplotlib.patches import FancyBboxPatch
+
+    def cell(x, y, size, face, edge="none", lw=0.0):
+        ax.add_patch(FancyBboxPatch((x, y), size, size, boxstyle="round,pad=0,rounding_size=0.8",
+                                    facecolor=face, edgecolor=edge, lw=lw, zorder=3 if lw else 2))
+
+    def yield_table(x0, y0, step, mode, colour):
+        hidden = {(1, 2), (3, 5), (0, 6), (4, 1), (2, 4)}
+        for i in range(6):
+            for j in range(8):
+                x, y = x0 + j * step, y0 + (5 - i) * step
+                if mode == "pair" and i == 2:
+                    continue
+                if mode == "wells" and (i, j) in hidden:
+                    cell(x + .5, y + .5, step - 1.6, "white", colour, 0.9)
+                else:
+                    cell(x + .5, y + .5, step - 1.6, OVERVIEW_CMAP(0.12 + 0.88 * cells[i, j]))
+        if mode == "pair":
+            ax.add_patch(FancyBboxPatch((x0 + .5, y0 + 3 * step + .5), 8 * step - 1.6, step - 1.6,
+                                        boxstyle="round,pad=0,rounding_size=1", facecolor="white",
+                                        edgecolor=colour, lw=1.0, zorder=3))
+            ax.text(x0 + 4 * step - .3, y0 + 3.5 * step - .1, "?", ha="center", va="center", color=colour,
+                    fontsize=6.5, weight="bold", zorder=4)
+
+    step = 4.3
+    yield_table(8, 20, step, "wells", TEAL)
+    yield_table(61, 20, step, "pair", ORANGE)
+    ax.text(51, 63, "What each test hides", ha="center", color=INK, fontsize=7.5, weight="bold")
+    ax.text(8 + 4 * step, 53, "Single wells", ha="center", color=TEAL, fontsize=6.5, weight="bold")
+    ax.text(61 + 4 * step, 53, "Whole pairs", ha="center", color=ORANGE, fontsize=6.5, weight="bold")
+    ax.text(51, 8, "Rows: pairs; columns: conditions", ha="center", color=GRAY, fontsize=6.5)
+
+    x0, x1, top, bottom = 126, 193, 51, 13
+    gap = (top - bottom) / 10
+    for screen in high.index:
+        y0, y1 = top - (held[screen] - 1) * gap, top - (new[screen] - 1) * gap
+        change = new[screen] - held[screen]
+        colour = down if change >= 3 else up if change <= -3 else flat
+        ax.plot([x0, x1], [y0, y1], color=colour, lw=1.4 if abs(change) >= 3 else 0.8,
+                solid_capstyle="round", zorder=3 if abs(change) >= 3 else 2)
+    ys = [top - k * gap for k in range(11)]
+    ax.scatter([x0] * 11, ys, s=6, color=TEAL, lw=0, zorder=4)
+    ax.scatter([x1] * 11, ys, s=6, color=ORANGE, lw=0, zorder=4)
+    ax.text(x0, 61, "Held-out wells", ha="center", color=TEAL, fontsize=6.5, weight="bold")
+    ax.text(x1, 61, "New pairs", ha="center", color=ORANGE, fontsize=6.5, weight="bold")
+    ax.text(267, 53, "Different tests,\ndifferent rankings", ha="center", va="center", color=INK,
+            fontsize=7.5, weight="bold", linespacing=1.15)
+    ax.text(267, 28, f"ρ = {rho11:.2f}", ha="center", color=INK, fontsize=12, weight="bold", gid="toc-rho")
+    ax.text(267, 16, "11 arrays", ha="center", color=GRAY, fontsize=6.5)
+    ax.text(267, 6, "mean yield ≥ 5%", ha="center", color=GRAY, fontsize=6.5)
     save(fig, "TOC")
 
 
@@ -1110,7 +1168,6 @@ def main():
     OUT = (args.output_dir or PACKAGE / "figures").resolve()
     OUT.mkdir(parents=True, exist_ok=True)
     figure1()
-    svg_to_pdf_png(OUT / "Figure_1.svg")
     for draw in (figure2, figure3, figure4, figure5, toc):
         draw()
     print(f"Saved Figures 1-5 and the graphical abstract in {OUT}")

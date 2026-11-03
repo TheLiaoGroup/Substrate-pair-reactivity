@@ -1,0 +1,9 @@
+compound_number,asset,pair_key,reagent_smiles,carbonyl_smiles,full_pair_order,mean_yield_percent,amino_or_protic
+1,chloronicotinaldehyde,Grignard-pair-00040,Fc1ccc([Mg]Br)cc1,O=Cc1cccnc1Cl,1,75.02936170212766,False
+2,dipyridyl_ketone,Grignard-pair-00084,Cc1ccccc1[Mg]Br,O=C(c1ccccn1)c1ccccn1,2,73.0377985,False
+3,chloropicolinaldehyde,Grignard-pair-00052,Cc1ccc([Mg]Br)cc1,O=Cc1cc(Cl)ccn1,3,72.08672086720867,False
+4,quinoline_8_carbaldehyde,Grignard-pair-00060,Cc1ccc([Mg]Cl)cc1,O=Cc1cccc2cccnc12,4,71.732112,False
+5,piperidinyl_acetophenone,Grignard-pair-00082,COc1ccccc1[Mg]Br,CC(=O)c1ccc(N2CCCCC2)cc1,109,13.718899999999989,True
+6,phenyl_methyl_pyrazolone,Grignard-pair-00065,COc1cccc([Mg]Br)c1,Cc1cc(=O)n(-c2ccccc2)[nH]1,122,0.0,True
+7,indolyl_acetone,Grignard-pair-00118,Cc1ccc([Mg]Br)cc1,CC(=O)Cc1c[nH]c2ccccc12,134,0.0,True
+8,methylamino_acetophenone,Grignard-pair-00143,CN(C)c1ccc([Mg]Br)cc1,CNc1ccc(C(C)=O)cc1,136,0.0,True

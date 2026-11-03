@@ -1,6 +1,6 @@
-"""Shared figure style for the approved Chem figures.
+"""Shared figure style for the manuscript figures.
 
-Arial throughout; 9-pt bold uppercase panel letters (Cell Press style) and titles; 8-pt axis titles, tick labels,
+Arial throughout; 9-pt bold uppercase panel letters and titles; 8-pt axis titles, tick labels,
 legends and annotations; neutral text (colour is carried by the marks only); no background gridlines.
 Panel letters and titles are placed after layout from the rendered extent of each panel, so that letters
 in one grid row share a baseline, letters in one grid column share a left edge, and each letter sits at or

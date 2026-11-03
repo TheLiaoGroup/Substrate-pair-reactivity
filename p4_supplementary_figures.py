@@ -5,7 +5,7 @@ S1 plate repeatability; S2 omitting an array and changing the yield cutoff; S3 o
 arrays; S4 absolute-error metrics; S5 the forest's gain over the identity model on new pairs; S6 substrate exposure
 of new-pair test wells and errors on wells whose two substrates were seen; S7 the full Grignard and
 esterification yield tables. Style and colours follow
-p4_chem_figures.py. Numbers are provisional until the supplementary information is ordered by first citation.
+p4_main_figures.py. Numbers are provisional until the supplementary information is ordered by first citation.
 """
 
 from __future__ import annotations
@@ -17,8 +17,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-import p4_chem_figures as main_figures
-from p4_chem_figures import (GRAY, GREEN, INK, LIGHT, MID, ORANGE, PURPLE, TEAL, WIDTH, despine, marker_style,
+import p4_main_figures as main_figures
+from p4_main_figures import (GRAY, GREEN, INK, LIGHT, MID, ORANGE, PURPLE, TEAL, WIDTH, despine, marker_style,
                              name, plt, rho, style)
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Rectangle
@@ -85,7 +85,7 @@ def figure_s2():
     ax.set_xlabel("Rank correlation without that array")
     despine(ax)
     ax = fig.add_subplot(grid[0, 1])
-    style.panel_title(ax, "B  It stays near zero from a 5% to an 11% cutoff")
+    style.panel_title(ax, "B  It stays near zero from a 5%\nto an 11% cutoff")
     sweep = [e for e in ranking["mean_yield_cutoff_sweep"] if e["rho_r2"] is not None]
     cut = np.array([e["mean_yield_cutoff_percent"] for e in sweep])
     values = np.array([e["rho_r2"] for e in sweep])

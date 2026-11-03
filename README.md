@@ -1,6 +1,6 @@
-# Whether a reaction screen predicts new substrate combinations can be anticipated from its yield table: code and data
+# Substrate-pair reactivity is what yield models fail to carry to new combinations: code and data
 
-This directory contains the released records, results and code for **Whether a reaction screen predicts new substrate combinations can be anticipated from its yield table**. The 19 high-throughput screens (arrays) in 17 transformations contain 406,909 records. The analysis uses 378,070 records: 357,356 recorded numerical yields and 20,714 zeros assigned by the measurement-status rule below. The package contains the data and summaries needed to redraw the figures. The repository is https://github.com/TheLiaoGroup/Yield-table-predictability. The DOI https://doi.org/10.5281/zenodo.23319287 is reserved for an unpublished Zenodo draft and does not yet identify a published dataset. File names keep the project prefix `p4_`. The code is released under the MIT License and the data and results under CC BY 4.0 (see `LICENSE`).
+This directory contains the released records, results and code for **Substrate-pair reactivity is what yield models fail to carry to new combinations**. The 19 high-throughput screens (arrays) in 17 transformations contain 406,909 records. The analysis uses 378,070 records: 357,356 recorded numerical yields and 20,714 zeros assigned by the measurement-status rule below. The package contains the data and summaries needed to redraw the figures. The repository is https://github.com/TheLiaoGroup/Substrate-pair-reactivity. Zenodo DOI: https://doi.org/10.5281/zenodo.23319287. File names keep the project prefix `p4_`. The code is released under the MIT License and the data and results under CC BY 4.0 (see `LICENSE`).
 
 ## Data
 
@@ -11,10 +11,17 @@ This directory contains the released records, results and code for **Whether a r
 | `data/p4_screens.json` | Per-screen metadata under `sources`: `reaction_family` (the screen's named transformation, 17 values for 19 screens; Suzuki and Suzuki Bpin share one, as do the two Buchwald–Hartwig screens), measurement-status counts, analyzed record count, mean yield, total sum of squares and the ordered condition vocabulary used for one-hot features. Model scores are stored separately under `output/`. |
 | `data/benchmarks/` | The 288 within-plate repeated-reaction yields used for Supplementary Fig. S1, with their reaction definitions. |
 
-The benchmark README's historical Extended Data Figure 1 label corresponds to
-the current Supplementary Figure S1.
-
 The four measurement statuses are `quantified` (357,356), `zero_by_rule` (20,714), `detected_not_quantified` (24,226) and `no_screen_record` (4,613). A finite source yield takes priority and is `quantified`. For a blank source yield, `yield_clf=0` assigns `zero_by_rule` and a numerical yield of zero; `yield_clf=1` assigns `detected_not_quantified`; any other or missing classification assigns `no_screen_record`. The last two statuses retain a missing numerical yield and do not enter prediction or scoring. Conditions are identified by their recorded condition identifiers; every model uses them as one-hot features.
+
+## Source Data
+
+`source_data/` contains numerical tables for Figures 1–5 and S1–S7,
+Table 1, Tables S1A–S1B and S2, and Supplemental Notes 1–4. Start with
+[`source_data/README.md`](source_data/README.md) for units and metric definitions.
+[`source_data/PANEL_SOURCE_MAP.csv`](source_data/PANEL_SOURCE_MAP.csv) maps each
+panel to its source files, columns and selections. The `figure_data/` and
+`chemistry/` subdirectories provide panel selections and chemical summaries;
+`data/` and `output/` retain the complete source records and saved result tables.
 
 ## Reproduce the manuscript results
 
@@ -22,12 +29,12 @@ Run from this directory using **Python 3.13.3** and the versions in `requirement
 
 ```powershell
 python -m pip install -r requirements-p4.txt
-python p4_chem_figures.py --output-dir figures
+python p4_main_figures.py --output-dir figures
 python p4_supplementary_figures.py --output-dir figures
 ```
 
-`p4_chem_figures.py` draws Figures 1–5 and the graphical abstract (TOC);
-`p4_supplementary_figures.py` draws the provisionally numbered Supplementary
+`p4_main_figures.py` draws Figures 1–5 and the graphical abstract (TOC);
+`p4_supplementary_figures.py` draws Supplementary
 Figures S1–S7. `chemical_assets/` contains ten editable ChemDraw CDXML masters
 and their native SVG exports: eight carbonyl partners and the Grignard-addition
 and esterification schemes. `assets.json` records their identities, native-export
@@ -36,12 +43,12 @@ vectors at their original size (14.4 pt bonds, 0.6 pt lines and 8 pt Arial), wit
 individually shrinking structures. ChemDraw is needed only to edit and re-export
 the chemical masters; redrawing the figures uses the supplied SVG files. Both renderers use
 `p4_figure_style.py`, with Arial at 9 and 8 pt. Install genuine Arial font files;
-font substitution is not supported. Figure 1's layered SVG is the editable
-master; its PDF and PNG are converted by the main script using `svglib`,
-`reportlab` and `PyMuPDF`. The conversion locates `arial.ttf`, `arialbd.ttf` and
-`ariali.ttf` in the system font directory. All figure values are available in the
-released data and result files; Chem delivery does not include a separate Source
-Data workbook.
+font substitution is not supported. Regenerated text spacing can vary slightly
+with the installed Arial font version. Figure 1 is drawn with matplotlib and
+exported as PDF, PNG and editable SVG, using the same drawing pipeline as the
+other figures. Native chemical artwork in the other figures is composed from
+the supplied SVG assets using `svglib`, `reportlab` and `PyMuPDF`. All figure
+values are available in the released data and result files.
 
 Per-well model predictions and resumable fitting checkpoints are not included in this package. The figures can be regenerated from the released summaries without fitting. Recomputing prediction-level diagnostics requires the corresponding saved predictions or refitting the models. All result directories below should be outside any cloud-synchronized directory. Add `--screen Minisci` to the RF, original-model or MLP fitting command to fit one screen.
 

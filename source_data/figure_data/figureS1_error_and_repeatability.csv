@@ -1,0 +1,4 @@
+screen,repeated_wells,new_pair_rmse_percentage_points,repeatability_sample_sd_percentage_points,error_to_repeatability_ratio
+Acylation,96,17.33022646399957,3.9528886839080632,4.3841928902652185
+Suzuki,96,22.697306038057068,4.643886284628576,4.887567146763678
+Buchwald-Hartwig,96,15.734249528670704,5.200834953209563,3.0253314458596137

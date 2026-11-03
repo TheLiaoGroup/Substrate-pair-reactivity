@@ -8,25 +8,9 @@
     <font id="3" charset="iso-8859-1" name="Arial" />
   </fonttable>
   <page id="101" BoundingBox="0 0 216 62" WidthPages="1" HeightPages="1">
-    <fragment id="102">
-      <n id="103" p="10.00000 31.00000" NodeType="GenericNickname">
-        <t p="7.30000 33.90000" LabelJustification="Left" LabelAlignment="Left">
-          <s font="3" size="8" face="96">R</s>
-        </t>
-      </n>
-      <n id="104" p="24.40000 31.00000" Element="12" NumHydrogens="0">
-        <t p="21.70000 33.90000" LabelJustification="Left" LabelAlignment="Left">
-          <s font="3" size="8" face="96">Mg</s>
-        </t>
-      </n>
-      <n id="105" p="38.80000 31.00000" NodeType="GenericNickname">
-        <t p="36.10000 33.90000" LabelJustification="Left" LabelAlignment="Left">
-          <s font="3" size="8" face="96">X</s>
-        </t>
-      </n>
-      <b id="106" B="103" E="104" Order="1" />
-      <b id="107" B="104" E="105" Order="1" />
-    </fragment>
+    <t p="7.30000 33.90000" LabelJustification="Left" LabelAlignment="Left" InterpretChemically="no">
+      <s font="3" size="8" face="0">RMgX</s>
+    </t>
     <t p="53.00000 34.00000" LabelJustification="Left" LabelAlignment="Left">
       <s font="3" size="8" face="0">+</s>
     </t>
@@ -56,9 +40,9 @@
       <s font="3" size="8" face="0">then H</s>
     </t>
     <t p="138.57000 55.20000" LabelJustification="Left" LabelAlignment="Left">
-      <s font="3" size="8" face="0">2</s>
+      <s font="3" size="6" face="0">2</s>
     </t>
-    <t p="143.02000 53.00000" LabelJustification="Left" LabelAlignment="Left" InterpretChemically="no">
+    <t p="141.91000 53.00000" LabelJustification="Left" LabelAlignment="Left" InterpretChemically="no">
       <s font="3" size="8" face="0">O</s>
     </t>
     <fragment id="117">
